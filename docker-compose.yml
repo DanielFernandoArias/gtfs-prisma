@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  db:
+    image: supabase/postgres
+    ports:
+      - "6666:6666"
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf 
+    environment:
+      POSTGRES_PASSWORD: postgres

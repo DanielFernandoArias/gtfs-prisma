@@ -1,7 +1,11 @@
 import { AgencyConfig } from "./type";
 import http from "http";
-import fs from "fs";
-import { downloadFile, extractZip, makeDir } from "./utils/files";
+import { readdir } from "node:fs";
+import { downloadFile, extractZip, listDir, makeDir } from "./utils/files";
+import { agencyFileUpload } from "./upload";
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
 
 export const stlouisConfig: AgencyConfig = {
   id: "stlouis",
@@ -16,14 +20,18 @@ const main = async () => {
   makeDir(".zip");
   makeDir(".zip/csv");
   const agencies = [stlouisConfig];
+
+  // download and extract all gtfs files
   for (const agency of agencies) {
     const fileName = `.zip/${agency.id}.zip`;
     const outDir = `.zip/csv/${agency.id}`;
     await downloadFile(agency.url, fileName);
     extractZip(fileName, outDir);
+    const files = listDir(outDir).filter(
+      (fileName) => !agency.exclude.includes(fileName.split(".")[0])
+    );
+    await agencyFileUpload(agency.id, files);
   }
 };
-
-
 
 main();

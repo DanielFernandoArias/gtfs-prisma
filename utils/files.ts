@@ -1,5 +1,11 @@
-import { ResponseType } from "axios";
-import { createWriteStream, existsSync, mkdirSync, rmSync } from "node:fs";
+import {
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  rmSync,
+  // readdirSync,
+} from "node:fs";
+import { readdirSync } from 'fs'
 import https from "https";
 import admZip from "adm-zip";
 
@@ -45,4 +51,12 @@ export const extractZip = (zipFile: string, outputDir: string) => {
   console.log("start unzip");
   zip.extractAllTo(outputDir);
   console.log("finished unzip");
+};
+
+export const listDir = (outDir: string) => {
+  // return readdir(outDir, (err, files) => {
+  //   if (err) throw Error();
+  //   return files;
+  // });
+  return readdirSync(outDir)
 };
