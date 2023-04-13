@@ -4,7 +4,9 @@ services:
   db:
     image: supabase/postgres
     ports:
-      - "6666:6666"
+      # can only use 5432 on docker port
+      # local port:docker port
+      - "5452:5432" 
     command: postgres -c config_file=/etc/postgresql/postgresql.conf 
     environment:
       POSTGRES_PASSWORD: postgres
