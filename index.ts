@@ -1,6 +1,4 @@
 import { AgencyConfig } from "./type";
-import http from "http";
-import { readdir } from "node:fs";
 import { downloadFile, extractZip, listDir, makeDir } from "./utils/files";
 import { agencyFileUpload } from "./upload";
 import { PrismaClient } from "@prisma/client";
@@ -31,6 +29,7 @@ const main = async () => {
       (fileName) => !agency.exclude.includes(fileName.split(".")[0])
     );
     await agencyFileUpload(agency.id, files);
+    console.log("fin");
   }
 };
 

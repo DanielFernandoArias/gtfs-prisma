@@ -1,8 +1,49 @@
 import { prisma } from "./index";
 import csvtojson from "csvtojson";
 
+const colParser = {
+  service_id: "string",
+  route_id: "string",
+  route_short_name: "string",
+  route_long_name: "string",
+  network_id: "string",
+  route_text_color: "string",
+  route_color: "string",
+  shape_id: "string",
+  stop_id:"string",
+  stop_code: "string",
+  wheelchair_boarding: "string",
+  tc_agency_id: "string",
+  stop_name: "string",
+  tts_stop_name: "string",
+  stop_desc: "string",
+  stop_lat: "string",
+  stop_lon: "string",
+  zone_id: "string",
+  stop_url: "string",
+  location_type: "string",
+  parent_station: "string",
+  stop_timezone: "string",
+  level_id: "string",
+  platform_code: "string",
+  from_stop_id: "string",   
+  to_stop_id: "string",     
+  from_route_id: "string",  
+  to_route_id: "string",    
+  from_trip_id: "string",   
+  to_trip_id: "string",    
+  trip_id:"string",                 
+  trip_headsign:"string",       
+  trip_short_name:"string",     
+  direction_id:"string",     
+  block_id:"string",            
+  wheelchair_accessible:"string",
+  bikes_allowed:"string",          
+};
+
 const agencyImport = async (agencyId: string, fileLoc: string) => {
   const json = await csvtojson({
+    colParser,
     checkType: true,
   }).fromFile(`.zip/csv/${agencyId}/${fileLoc}`);
 
@@ -23,6 +64,7 @@ const agencyImport = async (agencyId: string, fileLoc: string) => {
 };
 const calendarImport = async (agencyId: string, fileLoc: string) => {
   const json = await csvtojson({
+    colParser,
     checkType: true,
   }).fromFile(`.zip/csv/${agencyId}/${fileLoc}`);
 
@@ -43,9 +85,10 @@ const calendarImport = async (agencyId: string, fileLoc: string) => {
 };
 
 const calendarDatesImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
-    `.zip/csv/${agencyId}/${fileLoc}`
-  );
+  const json = await csvtojson({
+    colParser,
+    checkType: true,
+  }).fromFile(`.zip/csv/${agencyId}/${fileLoc}`);
   await prisma.$transaction([
     prisma.calendar_dates.deleteMany({
       where: { tc_agency_id: agencyId },
@@ -62,14 +105,15 @@ const calendarDatesImport = async (agencyId: string, fileLoc: string) => {
   ]);
 };
 const routesImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
-    `.zip/csv/${agencyId}/${fileLoc}`
-  );
+  const json = await csvtojson({
+    colParser,
+    checkType: true,
+  }).fromFile(`.zip/csv/${agencyId}/${fileLoc}`);
   await prisma.$transaction([
     prisma.routes.deleteMany({
       where: { tc_agency_id: agencyId },
     }),
-    prisma.calendar_dates.createMany({
+    prisma.routes.createMany({
       data: json.map((el) => {
         return {
           ...el,
@@ -81,9 +125,10 @@ const routesImport = async (agencyId: string, fileLoc: string) => {
   ]);
 };
 const shapesImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
-    `.zip/csv/${agencyId}/${fileLoc}`
-  );
+  const json = await csvtojson({
+    colParser,
+    checkType: true,
+  }).fromFile(`.zip/csv/${agencyId}/${fileLoc}`);
   await prisma.$transaction([
     prisma.shapes.deleteMany({
       where: { tc_agency_id: agencyId },
@@ -100,26 +145,41 @@ const shapesImport = async (agencyId: string, fileLoc: string) => {
   ]);
 };
 const stopTimesImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
+  const json = await csvtojson({ colParser, checkType: true }).fromFile(
     `.zip/csv/${agencyId}/${fileLoc}`
   );
+
+  const bulkAdds = (json: any[]) => {
+    const adds = [];
+
+    for (let i = 0; i <= json.length; i + 1000) {
+      adds.push(
+        prisma.stop_times.createMany({
+          data: json
+            .slice(i, i + 1000 < json.length ? i : json.length)
+            .map((el) => {
+              return {
+                ...el,
+                tc_agency_id: agencyId,
+                updated_at: new Date(),
+              };
+            }),
+        })
+      );
+    }
+
+    return adds;
+  };
+
   await prisma.$transaction([
     prisma.stop_times.deleteMany({
       where: { tc_agency_id: agencyId },
     }),
-    prisma.stop_times.createMany({
-      data: json.map((el) => {
-        return {
-          ...el,
-          tc_agency_id: agencyId,
-          updated_at: new Date(),
-        };
-      }),
-    }),
+    ...bulkAdds(json),
   ]);
 };
 const stopsImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
+  const json = await csvtojson({ colParser, checkType: true }).fromFile(
     `.zip/csv/${agencyId}/${fileLoc}`
   );
   await prisma.$transaction([
@@ -138,7 +198,7 @@ const stopsImport = async (agencyId: string, fileLoc: string) => {
   ]);
 };
 const transfersImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
+  const json = await csvtojson({ colParser, checkType: true }).fromFile(
     `.zip/csv/${agencyId}/${fileLoc}`
   );
   await prisma.$transaction([
@@ -157,7 +217,7 @@ const transfersImport = async (agencyId: string, fileLoc: string) => {
   ]);
 };
 const tripsImport = async (agencyId: string, fileLoc: string) => {
-  const json = await csvtojson({ checkType: true }).fromFile(
+  const json = await csvtojson({ colParser, checkType: true }).fromFile(
     `.zip/csv/${agencyId}/${fileLoc}`
   );
   await prisma.$transaction([
@@ -178,6 +238,7 @@ const tripsImport = async (agencyId: string, fileLoc: string) => {
 
 export const agencyFileUpload = async (outDir: string, fileLocs: string[]) => {
   for (const fileName of fileLocs) {
+    console.log(`start of ${fileName}`);
     switch (fileName) {
       case "agency.txt":
         await agencyImport(outDir, fileName);
@@ -194,9 +255,9 @@ export const agencyFileUpload = async (outDir: string, fileLocs: string[]) => {
       case "shapes.txt":
         await shapesImport(outDir, fileName);
         break;
-      case "stop_times.txt":
-        await stopTimesImport(outDir, fileName);
-        break;
+      // case "stop_times.txt":
+      //   await stopTimesImport(outDir, fileName);
+      //   break;
       case "stops.txt":
         await stopsImport(outDir, fileName);
         break;
@@ -206,9 +267,10 @@ export const agencyFileUpload = async (outDir: string, fileLocs: string[]) => {
       case "trips.txt":
         await tripsImport(outDir, fileName);
         break;
-
       default:
+        console.log("unknown file");
         break;
     }
+    console.log(`end of ${fileName}`);
   }
 };
