@@ -2,8 +2,15 @@ import { AgencyConfig } from "./type";
 import { downloadFile, extractZip, listDir, makeDir } from "./utils/files";
 import { agencyFileUpload } from "./upload";
 import { PrismaClient } from "@prisma/client";
+import pgPromise from "pg-promise";
+import dotenv from 'dotenv'
+
+
+export const { parsed: CONFIG = {} } = dotenv.config();
 
 export const prisma = new PrismaClient();
+export const pgp = pgPromise()
+export const pgClient = pgp(CONFIG.DATABASE_URL)
 
 export const stlouisConfig: AgencyConfig = {
   id: "stlouis",

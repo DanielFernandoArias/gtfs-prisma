@@ -32,10 +32,14 @@
     "axios": "^1.3.1",
     "csv-parse": "^5.0.4",
     "csvtojson": "^2.0.10",
+    "dotenv": "^16.0.3",
     "geojson": "^0.5.0",
     "gtfs-types": "^2.2.0",
+    "i": "^0.3.7",
     "nodemon": "^2.0.21",
+    "npm": "^9.6.4",
     "pbf": "^3.2.1",
+    "pg-promise": "^11.4.3",
     "prisma": "^4.9.0"
   },
   "repository": {

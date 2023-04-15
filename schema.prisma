@@ -8,8 +8,8 @@ datasource db {
 }
 
 model agency {
-  tc_agency_id    String
-  id              Int     @id @default(autoincrement())
+  tc_agency_id    String   @unique
+  id              Int      @id @default(autoincrement())
   agency_id       String?
   agency_name     String
   agency_url      String
@@ -22,33 +22,33 @@ model agency {
 }
 
 model areas {
-  tc_agency_id    String
-  area_id   String  @id
-  area_name String?
-  updated_at DateTime
+  tc_agency_id String
+  area_id      String   @id
+  area_name    String?
+  updated_at   DateTime
 }
 
 model calendar {
-  tc_agency_id    String
-  service_id String @id
-  monday     Int     
-  tuesday    Int     
-  wednesday  Int     
-  thursday   Int     
-  friday     Int     
-  saturday   Int     
-  sunday     Int     
-  end_date   Int     
-  start_date Int     
-  updated_at DateTime
+  tc_agency_id String
+  service_id   String   @id
+  monday       Int
+  tuesday      Int
+  wednesday    Int
+  thursday     Int
+  friday       Int
+  saturday     Int
+  sunday       Int
+  end_date     Int
+  start_date   Int
+  updated_at   DateTime
 
   @@index([end_date], map: "idx_calendar_end_date")
   @@index([start_date], map: "idx_calendar_start_date")
 }
 
 model calendar_dates {
-  tc_agency_id    String
-  id             Int     @id @default(autoincrement())
+  tc_agency_id   String
+  id             Int      @id @default(autoincrement())
   service_id     String
   date           Int
   exception_type Int
@@ -61,8 +61,8 @@ model calendar_dates {
 }
 
 model deadhead_times {
-  tc_agency_id    String
-  id                  Int     @id @default(autoincrement())
+  tc_agency_id        String
+  id                  Int      @id @default(autoincrement())
   deadhead_id         String
   arrival_time        String
   arrival_timestamp   Int?
@@ -81,8 +81,8 @@ model deadhead_times {
 }
 
 model deadheads {
-  tc_agency_id    String
-  deadhead_id      String  @id
+  tc_agency_id     String
+  deadhead_id      String   @id
   service_id       String
   block_id         String
   shape_id         String?
@@ -101,8 +101,8 @@ model deadheads {
 }
 
 model directions {
-  tc_agency_id    String
-  id           Int    @id @default(autoincrement())
+  tc_agency_id String
+  id           Int      @id @default(autoincrement())
   route_id     String
   direction_id Int?
   direction    String
@@ -113,8 +113,8 @@ model directions {
 }
 
 model fare_attributes {
-  tc_agency_id    String
-  fare_id           String  @id
+  tc_agency_id      String
+  fare_id           String   @id
   price             Float
   currency_type     String
   payment_method    Int
@@ -125,8 +125,8 @@ model fare_attributes {
 }
 
 model fare_products {
-  tc_agency_id    String
-  fare_product_id   String  @id
+  tc_agency_id      String
+  fare_product_id   String   @id
   fare_product_name String?
   amount            Float
   currency          String
@@ -134,8 +134,8 @@ model fare_products {
 }
 
 model fare_rules {
-  tc_agency_id    String
-  id             Int     @id @default(autoincrement())
+  tc_agency_id   String
+  id             Int      @id @default(autoincrement())
   fare_id        String
   route_id       String?
   origin_id      String?
@@ -144,10 +144,9 @@ model fare_rules {
   updated_at     DateTime
 }
 
-
 model feed_info {
-  tc_agency_id    String
-  id                  Int     @id @default(autoincrement())
+  tc_agency_id        String
+  id                  Int      @id @default(autoincrement())
   feed_publisher_name String
   feed_publisher_url  String
   feed_lang           String
@@ -162,7 +161,7 @@ model feed_info {
 
 model frequencies {
   tc_agency_id    String
-  id              Int    @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   trip_id         String
   start_time      String
   start_timestamp Int?
@@ -176,16 +175,16 @@ model frequencies {
 }
 
 model levels {
-  tc_agency_id    String
-  level_id    String  @id
-  level_index Float
-  level_name  String?
-  updated_at  DateTime
+  tc_agency_id String
+  level_id     String   @id
+  level_index  Float
+  level_name   String?
+  updated_at   DateTime
 }
 
 model ops_locations {
-  tc_agency_id    String
-  ops_location_id   String  @id
+  tc_agency_id      String
+  ops_location_id   String   @id
   ops_location_code String?
   ops_location_name String
   ops_location_desc String?
@@ -196,7 +195,7 @@ model ops_locations {
 
 model pathways {
   tc_agency_id           String
-  pathway_id             String  @id
+  pathway_id             String   @id
   from_stop_id           String
   to_stop_id             String
   pathway_mode           Int
@@ -211,15 +210,13 @@ model pathways {
   updated_at             DateTime
 }
 
-
-
 model routes {
-  route_id            String  @id
+  route_id            String   @id
   agency_id           String?
   route_short_name    String?
   route_long_name     String?
   route_desc          String?
-  route_type          Int       
+  route_type          Int
   route_url           String?
   route_color         String?
   route_text_color    String?
@@ -233,7 +230,7 @@ model routes {
 
 model run_event {
   tc_agency_id             String
-  run_event_id             String  @id
+  run_event_id             String   @id
   piece_id                 String
   event_type               Int
   event_name               String?
@@ -253,7 +250,7 @@ model run_event {
 model runs_pieces {
   tc_agency_id        String
   run_id              String
-  piece_id            String @id
+  piece_id            String   @id
   start_type          Int
   start_trip_id       String
   start_trip_position Int?
@@ -269,12 +266,12 @@ model runs_pieces {
 }
 
 model service_alert_targets {
-  tc_agency_id    String
-  alert_id  String  @id
-  stop_id   String?
-  route_id  String?
-  isUpdated Int     @default(1)
-  updated_at DateTime
+  tc_agency_id String
+  alert_id     String   @id
+  stop_id      String?
+  route_id     String?
+  isUpdated    Int      @default(1)
+  updated_at   DateTime
 
   @@index([route_id], map: "idx_service_alert_targets_route_id")
   @@index([stop_id], map: "idx_service_alert_targets_stop_id")
@@ -282,59 +279,59 @@ model service_alert_targets {
 }
 
 model service_alerts {
-  tc_agency_id    String
-  id          String @id
-  cause       Int
-  start_time  String
-  end_time    String
-  headline    String
-  description String
-  isUpdated   Int    @default(1)
-  updated_at  DateTime
+  tc_agency_id String
+  id           String   @id
+  cause        Int
+  start_time   String
+  end_time     String
+  headline     String
+  description  String
+  isUpdated    Int      @default(1)
+  updated_at   DateTime
 
   @@index([id], map: "idx_service_alerts_id")
 }
 
 model shapes {
-  tc_agency_id    String
-  id                  Int    @id @default(autoincrement())
+  tc_agency_id        String
+  id                  Int      @id @default(autoincrement())
   shape_id            String
   shape_pt_lat        Float
   shape_pt_lon        Float
   shape_pt_sequence   Int
-  shape_dist_traveled String?   // had to convert from Float?
+  shape_dist_traveled Float? // had to convert from Float?
   updated_at          DateTime
 
   @@index([shape_id], map: "idx_shapes_shape_id")
 }
 
 model stop_attributes {
-  tc_agency_id    String
-  id        Int     @id @default(autoincrement())
-  stop_id   String
-  stop_city String?
-  updated_at      DateTime
+  tc_agency_id String
+  id           Int      @id @default(autoincrement())
+  stop_id      String
+  stop_city    String?
+  updated_at   DateTime
 
   @@index([stop_id], map: "idx_stop_attributes_stop_id")
 }
 
 model stop_times {
-  tc_agency_id    String
-  id                  Int     @id @default(autoincrement())
+  tc_agency_id        String
+  id                  Int      @id @default(autoincrement())
   trip_id             String
   arrival_time        String?
-  arrival_timestamp   String?    // had to convert this from Int?
+  arrival_timestamp   Int? // had to convert this from Int?
   departure_time      String?
-  departure_timestamp String?    // had to convert this from Int?
+  departure_timestamp Int? // had to convert this from Int?
   stop_id             String
   stop_sequence       Int
   stop_headsign       String?
-  pickup_type         String?    // had to convert this from Int?
-  drop_off_type       String?    // had to convert this from Int?
-  continuous_pickup   String?    // had to convert this from Int?
-  continuous_drop_off String?    // had to convert this from Int?
-  shape_dist_traveled String?    // had to convert this from Float?
-  timepoint           String?    // had to convert this from Int?
+  pickup_type         Int? // had to convert this from Int?
+  drop_off_type       Int? // had to convert this from Int?
+  continuous_pickup   Int? // had to convert this from Int?
+  continuous_drop_off Int? // had to convert this from Int?
+  shape_dist_traveled Float? // had to convert this from Float?
+  timepoint           Int? // had to convert this from Int?
   updated_at          DateTime
 
   @@index([stop_sequence], map: "idx_stop_times_stop_sequence")
@@ -345,19 +342,19 @@ model stop_times {
 
 model stops {
   tc_agency_id        String
-  stop_id             String  @id
+  stop_id             String   @id
   stop_code           String?
   stop_name           String?
   tts_stop_name       String?
   stop_desc           String?
-  stop_lat            String?       // Had to change this from Float?
-  stop_lon            String?       // Had to change this from Float?
+  stop_lat            Float? // Had to change this from Float?
+  stop_lon            Float? // Had to change this from Float?
   zone_id             String?
   stop_url            String?
-  location_type       String?       // Had to change this from Int?
+  location_type       Int? // Had to change this from Int?
   parent_station      String?
   stop_timezone       String?
-  wheelchair_boarding String?       // Had to change this from Int?
+  wheelchair_boarding Int? // Had to change this from Int?
   level_id            String?
   platform_code       String?
   updated_at          DateTime
@@ -365,10 +362,9 @@ model stops {
   @@index([parent_station], map: "idx_stops_parent_station")
 }
 
-
 model timetable_stop_order {
-  tc_agency_id    String
-  id            Int     @id @default(autoincrement())
+  tc_agency_id  String
+  id            Int      @id @default(autoincrement())
   timetable_id  String?
   stop_id       String?
   stop_sequence Int?
@@ -379,8 +375,8 @@ model timetable_stop_order {
 }
 
 model timetables {
-  tc_agency_id    String
-  id                     Int     @id @default(autoincrement())
+  tc_agency_id           String
+  id                     Int      @id @default(autoincrement())
   timetable_id           String?
   route_id               String?
   direction_id           Int?
@@ -411,8 +407,8 @@ model timetables {
 }
 
 model transfers {
-  tc_agency_id    String
-  id                Int     @id @default(autoincrement())
+  tc_agency_id      String
+  id                Int      @id @default(autoincrement())
   from_stop_id      String?
   to_stop_id        String?
   from_route_id     String?
@@ -428,8 +424,8 @@ model transfers {
 }
 
 model translations {
-  tc_agency_id    String
-  id            Int     @id @default(autoincrement())
+  tc_agency_id  String
+  id            Int      @id @default(autoincrement())
   table_name    String
   field_name    String
   language      String
@@ -441,14 +437,14 @@ model translations {
 }
 
 model trip_updates {
-  tc_agency_id    String
-  update_id  String  @id
-  vehicle_id String?
-  trip_id    String?
-  start_date String?
-  timestamp  String?
-  isUpdated  Int     @default(1)
-  updated_at DateTime
+  tc_agency_id String
+  update_id    String   @id
+  vehicle_id   String?
+  trip_id      String?
+  start_date   String?
+  timestamp    String?
+  isUpdated    Int      @default(1)
+  updated_at   DateTime
 
   @@index([trip_id], map: "idx_trip_updates_trip_id")
   @@index([vehicle_id], map: "idx_trip_updates_vehicle_id")
@@ -456,17 +452,17 @@ model trip_updates {
 }
 
 model trips {
-  tc_agency_id    String
+  tc_agency_id          String
   route_id              String
   service_id            String
-  trip_id               String  @id
+  trip_id               String   @id
   trip_headsign         String?
   trip_short_name       String?
-  direction_id          String?     // had to change this from Int?
+  direction_id          Int? // had to change this from Int?
   block_id              String?
   shape_id              String?
-  wheelchair_accessible String?     // had to change this from Int?
-  bikes_allowed         String?     // had to change this from Int?
+  wheelchair_accessible Int? // had to change this from Int?
+  bikes_allowed         Int? // had to change this from Int?
   updated_at            DateTime
 
   @@index([shape_id], map: "idx_trips_shape_id")
@@ -476,19 +472,18 @@ model trips {
   @@index([route_id], map: "idx_trips_route_id")
 }
 
-
 model vehicle_positions {
-  tc_agency_id    String
-  update_id  String  @id
-  bearing    Float?
-  latitude   Float?
-  longitude  Float?
-  speed      Float?
-  trip_id    String?
-  vehicle_id String?
-  timestamp  String?
-  isUpdated  Int     @default(1)
-  updated_at DateTime
+  tc_agency_id String
+  update_id    String   @id
+  bearing      Float?
+  latitude     Float?
+  longitude    Float?
+  speed        Float?
+  trip_id      String?
+  vehicle_id   String?
+  timestamp    String?
+  isUpdated    Int      @default(1)
+  updated_at   DateTime
 
   @@index([vehicle_id], map: "idx_vehicle_positions_vehicle_id")
   @@index([trip_id], map: "idx_vehicle_positions_trip_id")
