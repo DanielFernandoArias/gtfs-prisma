@@ -1,6 +1,6 @@
-import { AgencyConfig } from "./type";
-import { downloadFile, extractZip, listDir, makeDir } from "./utils/files";
-import { agencyFileUpload } from "./upload";
+import { AgencyConfig } from "./type.js";
+import { downloadFile, extractZip, listDir, makeDir } from "./utils/files.js";
+import { agencyFileUpload } from "./upload.js";
 import { PrismaClient } from "@prisma/client";
 import pgPromise from "pg-promise";
 import dotenv from 'dotenv'

@@ -1,4 +1,4 @@
-import { pgClient, pgp, prisma } from "./index";
+import { pgClient, pgp, prisma } from "./index.js";
 import csvtojson from "csvtojson";
 
 const colParser = {
@@ -17,8 +17,6 @@ const colParser = {
   stop_name: "string",
   tts_stop_name: "string",
   stop_desc: "string",
-  // stop_lat: "string",
-  // stop_lon: "string",
   zone_id: "string",
   stop_url: "string",
   location_type: "string",
@@ -35,16 +33,11 @@ const colParser = {
   trip_id: "string",
   trip_headsign: "string",
   trip_short_name: "string",
-  // direction_id: "string",
   block_id: "string",
-  // wheelchair_accessible: "string",
   bikes_allowed: "string",
 };
 
-const deleteStatement = (
-  fileName: string,
-  agencyId: string,
-) => {
+const deleteStatement = (fileName: string, agencyId: string) => {
   return `DELETE FROM ${fileName.replace(
     ".txt",
     ""

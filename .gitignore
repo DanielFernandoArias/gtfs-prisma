@@ -106,3 +106,4 @@ dist
 
 # custom
 postgres-data/*
+build
