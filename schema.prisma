@@ -358,8 +358,11 @@ model stops {
   level_id            String?
   platform_code       String?
   updated_at          DateTime
+  geom                Unsupported("geometry(Point, 4326)")? // https://github.com/prisma/prisma/issues/1798
 
   @@index([parent_station], map: "idx_stops_parent_station")
+  @@index([geom], name: "stops_idx", type: Gist)
+
 }
 
 model timetable_stop_order {

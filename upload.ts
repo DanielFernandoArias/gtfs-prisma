@@ -37,6 +37,17 @@ const colParser = {
   bikes_allowed: "string",
 };
 
+const stopsGeomUpdate = async (
+  agencyId: string
+  ) => {
+    const res = await prisma.$executeRaw`
+                        UPDATE stops
+                        SET geom = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326)
+                        WHERE tc_agency_id = ${agencyId}`
+
+    console.log(`stops geom update result: ${res}`)
+}
+
 const deleteStatement = (fileName: string, agencyId: string) => {
   return `DELETE FROM ${fileName.replace(
     ".txt",
@@ -90,6 +101,7 @@ const insertAndDeleteTransaction = async (
       await t.none(insertStatement);
     })
     .catch((err) => {
+      //console.log(err)
       console.error(`issue with updating ${tablename}`);
     });
 };
@@ -185,9 +197,15 @@ const stopsImport = async (
   fileName: string,
   timestamp: Date
 ) => {
-  const json = await convertFile(fileName, timestamp, agencyId);
+  let json = await convertFile(fileName, timestamp, agencyId);
+  json = json.map((item) => {
+    return {
+      ...item,
+      geom: null
+    }});
   const deleteQuery = deleteStatement(fileName, agencyId);
   await insertAndDeleteTransaction("stops", json, deleteQuery);
+  await stopsGeomUpdate(agencyId)
 };
 
 const transfersImport = async (
