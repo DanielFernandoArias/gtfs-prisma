@@ -5,9 +5,9 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "NODE_PATH=./build node build/index.js",
+    "start": "set NODE_PATH=./build node build/index.js",
     "build": "tsc -p .",
-    "dev": "prisma generate && nodemon --watch './**/*.ts' --exec 'node --experimental-specifier-resolution=node --loader ts-node/esm' index.ts",
+    "dev": "prisma generate & nodemon --watch './**/*.ts' --exec node --experimental-specifier-resolution=node --loader ts-node/esm index.ts",
     "down": "docker compose down -v"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
     "eslint": "^8.33.0",
+    "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
   },
@@ -35,7 +36,6 @@
     "dotenv": "^16.0.3",
     "geojson": "^0.5.0",
     "i": "^0.3.7",
-    "nodemon": "^2.0.21",
     "npm": "^9.6.4",
     "pbf": "^3.2.1",
     "pg-promise": "^11.4.3",
