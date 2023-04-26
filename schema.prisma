@@ -308,6 +308,7 @@ model shapes {
 model shape_geos { // table added to store shape level geometry
   tc_agency_id        String
   shape_id            String
+  updated_at          DateTime
   geom                Unsupported("geometry(LineString, 4326)")? // https://github.com/prisma/prisma/issues/1798
 
   @@id([tc_agency_id, shape_id]) // these two columns form a unique id

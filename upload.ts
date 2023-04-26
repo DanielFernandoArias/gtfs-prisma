@@ -38,17 +38,19 @@ const colParser = {
 };
 
 const shapesGeomInsertStatement = (
+  timestamp: Date,
   agencyId: string
 ) => {
-  return `insert into shape_geos values 
-                  select tc_agency_id, shape_id, ST_GeomFromText('LineString(' || pt_seq || ')', 4326) as geom
-                  from (
-                    select tc_agency_id, shape_id, string_agg(shape_pt_lon || ' ' || shape_pt_lat, ',' order by shape_pt_sequence) as pt_seq
-                    from shapes where tc_agency_id = '${agencyId}'
-                    group by tc_agency_id, shape_id
-                  ) shp
-                `
+  return `insert into shape_geos 
+            select tc_agency_id, shape_id, 
+            to_timestamp(${timestamp.getTime()} / 1000.0) as updated_at, 
+            ST_GeomFromText('LineString(' || pt_seq || ')', 4326) as geom
+            from (select tc_agency_id, shape_id, string_agg(shape_pt_lon || ' ' || shape_pt_lat, ',' order by shape_pt_sequence) as pt_seq
+              from shapes where tc_agency_id = '${agencyId}'
+              group by tc_agency_id, shape_id
+            ) shp`
 }
+
 
 const stopsGeomUpdate = async (
   agencyId: string
@@ -58,7 +60,7 @@ const stopsGeomUpdate = async (
                   set geom = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326)
                   where tc_agency_id = ${agencyId}`
 
-    console.log(`stops geom update result: ${res}`)
+    //console.log(`stops geom update result: ${res}`)
 }
 
 const deleteStatement = (fileName: string, agencyId: string) => {
@@ -112,7 +114,6 @@ const execInsertDeleteTransaction = async (
     await t.none(insertStatement);
   })
   .catch((err) => {
-    //console.log(err)
     console.error(`issue with updating ${tableName}`);
   });
 }
@@ -205,22 +206,9 @@ const shapesImport = async (
   await deleteAndBulkInsertTransaction("shapes", json, deleteQuery);
 
   // shapes data table -> shape geos
-  // const insertQueryGeom = shapesGeomInsertStatement(agencyId);
-  // const deleteQueryGeom = deleteStatement("shape_geos", agencyId);
-  // await execInsertDeleteTransaction("shape_geos", deleteQueryGeom, insertQueryGeom);
-  await prisma.$transaction([
-    prisma.shape_geos.deleteMany({
-      where: { tc_agency_id: agencyId },
-    }),
-    prisma.$executeRaw`insert into shape_geos 
-      select tc_agency_id, shape_id, ST_GeomFromText('LineString(' || pt_seq || ')', 4326)
-      from (
-        select tc_agency_id, shape_id, string_agg(shape_pt_lon || ' ' || shape_pt_lat, ',' order by shape_pt_sequence) as pt_seq
-        from shapes where tc_agency_id = ${agencyId}
-        group by tc_agency_id, shape_id
-      ) shp
-      `
-   ]);
+  const insertQueryGeom = shapesGeomInsertStatement(timestamp, agencyId);
+  const deleteQueryGeom = deleteStatement("shape_geos", agencyId);
+  await execInsertDeleteTransaction("shape_geos", deleteQueryGeom, insertQueryGeom);
 };
 
 const stopTimesImport = async (
