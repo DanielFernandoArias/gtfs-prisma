@@ -305,6 +305,16 @@ model shapes {
   @@index([shape_id], map: "idx_shapes_shape_id")
 }
 
+model shape_geos { // table added to store shape level geometry
+  tc_agency_id        String
+  shape_id            String
+  geom                Unsupported("geometry(LineString, 4326)")? // https://github.com/prisma/prisma/issues/1798
+
+  @@id([tc_agency_id, shape_id]) // these two columns form a unique id
+  @@index([geom], name: "shape_geom_idx", type: Gist)
+
+}
+
 model stop_attributes {
   tc_agency_id String
   id           Int      @id @default(autoincrement())

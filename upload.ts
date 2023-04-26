@@ -37,13 +37,26 @@ const colParser = {
   bikes_allowed: "string",
 };
 
+const shapesGeomInsertStatement = (
+  agencyId: string
+) => {
+  return `insert into shape_geos values 
+                  select tc_agency_id, shape_id, ST_GeomFromText('LineString(' || pt_seq || ')', 4326) as geom
+                  from (
+                    select tc_agency_id, shape_id, string_agg(shape_pt_lon || ' ' || shape_pt_lat, ',' order by shape_pt_sequence) as pt_seq
+                    from shapes where tc_agency_id = '${agencyId}'
+                    group by tc_agency_id, shape_id
+                  ) shp
+                `
+}
+
 const stopsGeomUpdate = async (
   agencyId: string
   ) => {
     const res = await prisma.$executeRaw`
-                        UPDATE stops
-                        SET geom = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326)
-                        WHERE tc_agency_id = ${agencyId}`
+                  update stops
+                  set geom = ST_SetSRID(ST_MakePoint(stop_lon, stop_lat),4326)
+                  where tc_agency_id = ${agencyId}`
 
     console.log(`stops geom update result: ${res}`)
 }
@@ -88,22 +101,30 @@ const bulkInsertStatement = (tableName: string, bulkData: any[]) => {
   }
 };
 
-const insertAndDeleteTransaction = async (
+const execInsertDeleteTransaction = async (
+  tableName: string,
+  deleteStatement: string,
+  insertStatement: string
+) => {
+  return await pgClient
+  .tx(`update ${tableName}`, async (t) => {
+    await t.none(deleteStatement);
+    await t.none(insertStatement);
+  })
+  .catch((err) => {
+    //console.log(err)
+    console.error(`issue with updating ${tableName}`);
+  });
+}
+
+const deleteAndBulkInsertTransaction = async (
   fileName: string,
   bulkData: any[],
-  deleteStatement: string
+  deleteStatement: string,
 ) => {
   const tablename = fileName.replace(".txt", "");
   const insertStatement = bulkInsertStatement(tablename, bulkData);
-  return await pgClient
-    .tx(`update ${tablename}`, async (t) => {
-      await t.none(deleteStatement);
-      await t.none(insertStatement);
-    })
-    .catch((err) => {
-      //console.log(err)
-      console.error(`issue with updating ${tablename}`);
-    });
+  return await execInsertDeleteTransaction(tablename, deleteStatement, insertStatement)
 };
 
 const agencyImport = async (
@@ -177,9 +198,29 @@ const shapesImport = async (
   fileName: string,
   timestamp: Date
 ) => {
+
+  // shapes.txt -> shapes data table
   const json = await convertFile(fileName, timestamp, agencyId);
   const deleteQuery = deleteStatement(fileName, agencyId);
-  await insertAndDeleteTransaction("shapes", json, deleteQuery);
+  await deleteAndBulkInsertTransaction("shapes", json, deleteQuery);
+
+  // shapes data table -> shape geos
+  // const insertQueryGeom = shapesGeomInsertStatement(agencyId);
+  // const deleteQueryGeom = deleteStatement("shape_geos", agencyId);
+  // await execInsertDeleteTransaction("shape_geos", deleteQueryGeom, insertQueryGeom);
+  await prisma.$transaction([
+    prisma.shape_geos.deleteMany({
+      where: { tc_agency_id: agencyId },
+    }),
+    prisma.$executeRaw`insert into shape_geos 
+      select tc_agency_id, shape_id, ST_GeomFromText('LineString(' || pt_seq || ')', 4326)
+      from (
+        select tc_agency_id, shape_id, string_agg(shape_pt_lon || ' ' || shape_pt_lat, ',' order by shape_pt_sequence) as pt_seq
+        from shapes where tc_agency_id = ${agencyId}
+        group by tc_agency_id, shape_id
+      ) shp
+      `
+   ]);
 };
 
 const stopTimesImport = async (
@@ -189,7 +230,7 @@ const stopTimesImport = async (
 ) => {
   const json = await convertFile(fileName, timestamp, agencyId);
   const deleteQuery = deleteStatement(fileName, agencyId);
-  await insertAndDeleteTransaction("stop_times", json, deleteQuery);
+  await deleteAndBulkInsertTransaction("stop_times", json, deleteQuery);
 };
 
 const stopsImport = async (
@@ -204,7 +245,7 @@ const stopsImport = async (
       geom: null
     }});
   const deleteQuery = deleteStatement(fileName, agencyId);
-  await insertAndDeleteTransaction("stops", json, deleteQuery);
+  await deleteAndBulkInsertTransaction("stops", json, deleteQuery);
   await stopsGeomUpdate(agencyId)
 };
 
@@ -231,7 +272,7 @@ const tripsImport = async (
 ) => {
   const json = await convertFile(fileName, timestamp, agencyId);
   const deleteQuery = deleteStatement(fileName, agencyId);
-  await insertAndDeleteTransaction("trips", json, deleteQuery);
+  await deleteAndBulkInsertTransaction("trips", json, deleteQuery);
 };
 
 export const agencyFileUpload = async (outDir: string, fileLocs: string[]) => {
